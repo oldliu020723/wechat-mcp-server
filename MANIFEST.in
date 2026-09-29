@@ -1,0 +1,25 @@
+# Source distribution manifest.
+#
+# Why this file exists: setuptools' default rules ship tests/test*.py but NOT
+# tests/conftest.py. That conftest installs an autouse fixture which blocks all
+# real network access, so a source tree unpacked from the sdist would otherwise
+# run its test suite against the live network. Include tests/ explicitly.
+
+include LICENSE
+include README.md
+include requirements.txt
+include requirements-dev.txt
+include requirements.lock.txt
+
+recursive-include tests *.py
+recursive-include examples *.py
+
+# Keep build artifacts out of the sdist. Bytecode and __pycache__ are already
+# handled by setuptools' default rules, so they are deliberately not listed
+# here -- listing them only produces "no previously-included files" noise.
+prune .venv
+prune venv
+prune build
+prune dist
+prune .pytest_cache
+prune .git

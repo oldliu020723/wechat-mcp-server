@@ -18,6 +18,10 @@
 
 ## 安装
 
+两种用法任选其一。**方式一不需要 `pip install` 本项目本身。**
+
+### 方式一：源码直跑（推荐）
+
 ```bash
 # 1) 创建并激活虚拟环境（Ubuntu 24.04 等发行版禁止向系统 Python 装包）
 python3 -m venv .venv
@@ -26,6 +30,15 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 # 2) 安装依赖——务必显式指定 HTTPS 官方源
 pip install -r requirements.txt -i https://pypi.org/simple
 ```
+
+### 方式二：安装为包
+
+```bash
+pip install . -i https://pypi.org/simple
+```
+
+装完会得到一个 `wechat-mcp-server` 命令，与 `python run.py` 完全等价
+（两者都走 `wechat_mcp/cli.py`，参数和行为一致）。
 
 > **为什么一定要写 `-i https://pypi.org/simple`**
 > 明文 HTTP 的镜像源可以被中间人替换任意 wheel 包。本项目做了不少安全加固，
@@ -195,6 +208,21 @@ MCP 客户端可以据此判断能否自动调用。
 > 如果你的账号属于这些类型，`publish_wechat_draft` / `get_publish_status` /
 > `list_published` 可能会返回权限错误（48001）。其余草稿与素材类工具不受影响。
 
+## 打包
+
+```bash
+pip install build -i https://pypi.org/simple
+python -m build
+```
+
+产物落在 `dist/`：wheel 用于安装，sdist 用于分发源码。sdist 内含完整的
+`tests/`，`MANIFEST.in` 负责把 `conftest.py` 一并带上——setuptools 的默认规则
+只收 `tests/test*.py`，漏掉 `conftest.py` 的话，从 sdist 解包跑测试就会真的
+去连网络。
+
+版本号只有一处定义（`wechat_mcp/__init__.py` 的 `__version__`），
+`pyproject.toml` 通过 `dynamic = ["version"]` 读取，不需要两处同步。
+
 ## 开发
 
 ```bash
@@ -213,6 +241,7 @@ python -m pytest -v
 ```
 wechat-mcp-server/
 ├── run.py                     # 源码直跑入口
+├── MANIFEST.in                # sdist 内容清单
 ├── wechat_mcp/
 │   ├── cli.py                 # 命令行参数解析
 │   ├── settings.py            # 配置数据类

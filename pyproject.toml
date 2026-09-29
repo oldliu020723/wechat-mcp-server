@@ -1,16 +1,42 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+# PEP 639 (SPDX license expression + license-files) requires setuptools>=77;
+# older versions treat project.license as the deprecated TOML table form.
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "wechat-mcp-server"
-version = "1.0.0"
 description = "MCP server for the WeChat Official Account API (stdio and streamable HTTP)."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "oldliu020723" }]
 keywords = ["mcp", "wechat", "official-account", "model-context-protocol"]
+
+# Single source of truth for the version: wechat_mcp/__init__.py's __version__,
+# read back via [tool.setuptools.dynamic] below. Do not hardcode a second copy
+# here, or the two will drift.
+dynamic = ["version"]
+
+# Note: the license is declared above as an SPDX expression, so do NOT add a
+# "License :: OSI Approved :: MIT License" classifier - setuptools reports a
+# conflict when both forms are present.
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Natural Language :: Chinese (Simplified)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Communications",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 
 # Pinned on purpose. mcp 2.x renamed FastMCP to MCPServer and turned
 # "mcp.server.fastmcp" into a stub that raises on import, so the upper bound
@@ -25,6 +51,14 @@ dev = ["pytest==8.3.4", "pytest-asyncio==0.25.2"]
 
 [project.scripts]
 wechat-mcp-server = "wechat_mcp.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/oldliu020723/wechat-mcp-server"
+Repository = "https://github.com/oldliu020723/wechat-mcp-server"
+Issues = "https://github.com/oldliu020723/wechat-mcp-server/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "wechat_mcp.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["wechat_mcp*"]
