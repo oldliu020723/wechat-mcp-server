@@ -1,0 +1,10 @@
+# Runtime dependencies for wechat-mcp-server.
+#
+# Versions are pinned deliberately:
+#   - mcp 2.x renamed FastMCP to MCPServer and turns
+#     "mcp.server.fastmcp" into a stub that raises on import.
+#   - Installing from a plain HTTP mirror lets a MITM swap these wheels.
+#     Always install over HTTPS from the official index:
+#       pip install -r requirements.txt -i https://pypi.org/simple
+mcp==1.30.0
+httpx==0.28.1

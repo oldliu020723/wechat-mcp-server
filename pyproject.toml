@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wechat-mcp-server"
+version = "1.0.0"
+description = "MCP server for the WeChat Official Account API (stdio and streamable HTTP)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "oldliu020723" }]
+keywords = ["mcp", "wechat", "official-account", "model-context-protocol"]
+
+# Pinned on purpose. mcp 2.x renamed FastMCP to MCPServer and turned
+# "mcp.server.fastmcp" into a stub that raises on import, so the upper bound
+# is load-bearing rather than cosmetic.
+dependencies = [
+    "mcp>=1.30,<2",
+    "httpx>=0.28,<1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.4", "pytest-asyncio==0.25.2"]
+
+[project.scripts]
+wechat-mcp-server = "wechat_mcp.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["wechat_mcp*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
