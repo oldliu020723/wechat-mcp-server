@@ -11,8 +11,14 @@ include requirements.txt
 include requirements-dev.txt
 include requirements.lock.txt
 
+# run.py is a top-level script rather than part of the wechat_mcp package, so
+# setuptools does not pick it up on its own. Without it the "run straight from
+# source" workflow does not exist in an unpacked sdist.
+include run.py
+
 recursive-include tests *.py
 recursive-include examples *.py
+recursive-include deploy *
 
 # Keep build artifacts out of the sdist. Bytecode and __pycache__ are already
 # handled by setuptools' default rules, so they are deliberately not listed

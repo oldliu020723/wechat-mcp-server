@@ -1,0 +1,88 @@
+# systemd unit for wechat-mcp-server, streamable-http transport.
+#
+# Install:
+#     sudo install -m 0644 wechat-mcp.service /etc/systemd/system/
+#     sudo systemctl daemon-reload && sudo systemctl enable --now wechat-mcp
+#
+# The full walkthrough - virtualenv, config file, verification - is in the
+# repository README, section "部署二：streamable-http（远程常驻）".
+#
+# Everything site-specific lives in /etc/wechat-mcp/wechat-mcp.env, so this
+# file only needs editing if the install paths or the run user change.
+
+[Unit]
+Description=WeChat Official Account MCP Server (streamable-http)
+Documentation=https://github.com/oldliu020723/wechat-mcp-server
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=wechat-mcp
+Group=wechat-mcp
+
+WorkingDirectory=/opt/wechat-mcp-server
+EnvironmentFile=/etc/wechat-mcp/wechat-mcp.env
+
+# ${...} substitutes without word-splitting, so the hostname survives intact
+# even if it is not a plain literal. The two fixed entries after it are there
+# so you can probe the service from the box itself.
+ExecStart=/opt/wechat-mcp-server/.venv/bin/python /opt/wechat-mcp-server/run.py \
+    --transport streamable-http \
+    --host ${WECHAT_MCP_LISTEN_HOST} \
+    --port ${WECHAT_MCP_LISTEN_PORT} \
+    --allowed-host ${WECHAT_MCP_ALLOWED_HOST} \
+    --allowed-host 127.0.0.1 \
+    --allowed-host localhost \
+    --log-level INFO
+
+Restart=always
+# Exit code 2 means the startup fail-safe rejected the configuration: the token
+# is missing or under 32 chars, or no --allowed-host was declared. Restarting
+# cannot fix that, and a tight loop would bury the real message in the journal.
+RestartPreventExitStatus=2
+RestartSec=5s
+
+TimeoutStopSec=15s
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=wechat-mcp
+
+# --- Hardening ---------------------------------------------------------------
+# The service only reads its own tree under /opt and talks out over TCP, so it
+# can run with a very small footprint. If any of this turns out to be too
+# strict for your host, comment the offending line out and re-run
+# `systemd-analyze security wechat-mcp` to see what it bought you.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+RestrictSUIDSGID=true
+RestrictRealtime=true
+RestrictNamespaces=true
+# AF_UNIX is needed for DNS through systemd-resolved and for journald;
+# AF_NETLINK for glibc's interface lookups during address resolution.
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+# Port 8000 is unprivileged, so no capabilities are required at all.
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
