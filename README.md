@@ -1,7 +1,6 @@
 # wechat-mcp-server
 
 微信公众号开放接口的 MCP 服务。支持 `stdio` 与 `streamable-http` 两种传输，
-**可以直接用源码运行**，不需要 `pip install` 本项目本身。
 
 本文只讲部署与配置。两种部署形态：
 
